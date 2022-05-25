@@ -207,7 +207,6 @@ if __name__ == '__main__':
         condition.acquire()
         dataWatchFinished = 0
         # 读取sql指令
-        # sql_input = cmd_get_sql()
         sql_input = zookeeperClient.cmd_get_sql()
         sql_tmp = sql_input.replace(';', '').strip().split()
         # 如果是文件处理，转处理函数
