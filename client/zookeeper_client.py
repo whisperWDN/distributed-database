@@ -190,7 +190,8 @@ class LoadBalance:
             print('Table not exists.')
             return []
         else:
-            ans = [zookeeperClient.zk.get_children("/tables/" + table_name)[math.floor(random.random() * 2)]]  # 已有的两个服务器中选一个进行读取
+            ans = [zookeeperClient.zk.get_children("/tables/" + table_name)[
+                       math.floor(random.random() * 2)]]  # 已有的两个服务器中选一个进行读取
             return ans
 
 

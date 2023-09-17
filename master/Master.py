@@ -112,7 +112,7 @@ class Master:
         # global server_num
         # global server_list
         if Master.server_num < len(children):
-            server_num = len(children)
+            Master.server_num = len(children)
             Master.server_list.clear()
             for ch in children:
                 data, stat = Master.zk.get('/party/{}'.format(ch))
@@ -126,7 +126,7 @@ class Master:
                 if server not in cur_server_list:
                     Master.copy_server(server)
                     Master.delete_server_node(server)
-            server_list = cur_server_list[:]
+            Master.server_list = cur_server_list[:]
 
     @staticmethod
     def watch_instruction_children(children):
@@ -199,29 +199,28 @@ class Master:
 
 
 if __name__ == '__main__':
-    master = Master()
     # 开始心跳
-    master.zk.start()
+    Master.zk.start()
     # party部分，用于检测服务器断线情况
-    master.zk.ensure_path('/party')
-    master.zk.ChildrenWatch('/party', master.watch_server_party)
-    party = master.zk.Party('/party', master.server_name)
+    Master.zk.ensure_path('/party')
+    Master.zk.ChildrenWatch('/party', Master.watch_server_party)
+    party = Master.zk.Party('/party', Master.server_name)
     party.join()
 
     # 构建zookeeper结构
-    master.zk.ensure_path('/tables')
-    master.zk.ensure_path('/indexes')
-    master.zk.ensure_path("{}/tables".format(master.server_path))
-    master.zk.set("{}".format(master.server_path), b'0')
-    master.zk.ensure_path("{}/info".format(master.server_path))
-    if not master.zk.exists("{}/info/recordNum".format(master.server_path)):
-        master.zk.create("{}/info/recordNum".format(master.server_path), b'0')
-    if not master.zk.exists("{}/info/tableNum".format(master.server_path)):
-        master.zk.create("{}/info/tableNum".format(master.server_path), b'0')
-    master.zk.delete("{}/instructions".format(master.server_path), recursive=True)
-    master.zk.ensure_path("{}/instructions".format(master.server_path))
+    Master.zk.ensure_path('/tables')
+    Master.zk.ensure_path('/indexes')
+    Master.zk.ensure_path("{}/tables".format(Master.server_path))
+    Master.zk.set("{}".format(Master.server_path), b'0')
+    Master.zk.ensure_path("{}/info".format(Master.server_path))
+    if not Master.zk.exists("{}/info/recordNum".format(Master.server_path)):
+        Master.zk.create("{}/info/recordNum".format(Master.server_path), b'0')
+    if not Master.zk.exists("{}/info/tableNum".format(Master.server_path)):
+        Master.zk.create("{}/info/tableNum".format(Master.server_path), b'0')
+    Master.zk.delete("{}/instructions".format(Master.server_path), recursive=True)
+    Master.zk.ensure_path("{}/instructions".format(Master.server_path))
     # 监听指令节点
-    master.zk.ChildrenWatch(master.server_path + "/instructions", master.watch_instruction_children)
+    Master.zk.ChildrenWatch(Master.server_path + "/instructions", Master.watch_instruction_children)
 
     while True:
         sleep(60)
